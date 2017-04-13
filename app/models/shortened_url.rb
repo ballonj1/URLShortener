@@ -23,7 +23,11 @@ class ShortenedURL < ActiveRecord::Base
   end
 
   def num_uniques
-    self.visits.select(:user_id).distinct.count
+    self.visitors.select(:user_id).count
+  end
+
+  def num_recent_uniques
+    self.visitors.select(:user_id).where(updated_at: (40.minutes.ago..Time.now)).count
   end
 
   belongs_to :submitter,
@@ -37,6 +41,7 @@ class ShortenedURL < ActiveRecord::Base
     class_name: "Visit"
 
   has_many :visitors,
+    Proc.new { distinct },
     through: :visits,
     source: :visitor
 
